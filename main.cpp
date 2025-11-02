@@ -26,7 +26,7 @@ int main() {
     int freq[26] = {0};
 
     // Step 1: Read file and count letter frequencies
-    buildFrequencyTable(freq, "input.txt");
+    buildFrequencyTable(freq, "input.txt"); //not a method, need to use the methods above to write
 
     // Step 2: Create leaf nodes for each character with nonzero frequency
     int nextFree = createLeafNodes(freq);
@@ -91,22 +91,65 @@ int createLeafNodes(int freq[]) {
 int buildEncodingTree(int nextFree) {
     // TODO:
     // 1. Create a MinHeap object.
+    MinHeap heap;
     // 2. Push all leaf node indices into the heap.
+    for (int i = 0; i < nextFree; i++) {
+        heap.push(i, weightArr);
+    }
     // 3. While the heap size is greater than 1:
     //    - Pop two smallest nodes
     //    - Create a new parent node with combined weight
     //    - Set left/right pointers
     //    - Push new parent index back into the heap
+    while (heap.size > 1) {
+        int left = heap.pop(weightArr);
+        int right = heap.pop(weightArr);
+        int parent = nextFree++;
+
+        weightArr[parent] = weightArr[left] + weightArr[right];
+        leftArr[parent] = left;
+        rightArr[parent] = right;
+        charArr[parent] = '*';
+
+        heap.push(parent, weightArr);
+     }
     // 4. Return the index of the last remaining node (root)
-    return -1; // placeholder
+    return heap.pop(weightArr);
 }
 
 // Step 4: Use an STL stack to generate codes
 void generateCodes(int root, string codes[]) {
     // TODO:
     // Use stack<pair<int, string>> to simulate DFS traversal.
-    // Left edge adds '0', right edge adds '1'.
-    // Record code when a leaf node is reached.
+    if (root == -1) {
+        return;
+    }
+    stack<pair<int, string>> stack;
+    stack.push(pair<int, string>(root, ""));
+    while (!stack.empty()) {
+        pair<int, string> top = stack.top();
+        stack.pop();
+
+        int node = top.first;
+        string code = top.second;
+
+        int left = leftArr[node];
+        int right = rightArr[node];
+        // Record code when a leaf node is reached.
+        if (left == -1 && right == -1) {
+            char c = charArr[node];
+            codes[c - 'a'] = code;
+        }
+        // Left edge adds '0', right edge adds '1'.
+        else {
+            if (right != -1) {
+                stack.push(pair<int, string>(right, code + "1"));
+            }
+            if (left != -1) {
+                stack.push(pair<int,string>(left, code + "0"));
+            }
+        }
+    }
 }
 
 // Step 5: Print table and encoded message
