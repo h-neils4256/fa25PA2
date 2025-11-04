@@ -124,6 +124,7 @@ void generateCodes(int root, string codes[]) {
     if (root == -1) {
         return;
     }
+    //stack DFS acting like recusioon, not actual recursive functionality
     stack<pair<int, string>> stack;
     stack.push(pair<int, string>(root, ""));
     while (!stack.empty()) {
